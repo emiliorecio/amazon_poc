@@ -39,9 +39,18 @@ public class ItemTest {
     private String DOMAIN_URL;
     private WebDriver driver;
     private ArrayList<String> tabs;
-    private final List<String> results_with_out_TAX = new ArrayList<>();
-    private final List<String> results_with_TAX = new ArrayList<>();
+    private final List<StringBuilder>  results_with_out_TAX = new ArrayList<>();
+    private final List<StringBuilder>  results_with_TAX = new ArrayList<>();
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
 
     @BeforeSuite(alwaysRun = true)
     public void initDriver() throws Exception {
@@ -77,21 +86,25 @@ public class ItemTest {
 
     //@Test
     public void testMenu2() {
-        this.driver.get("https://www.amazon.com");
-        JavascriptExecutor js = (JavascriptExecutor) driver;
+        this.driver.get("https://www.amazon.es/gp/cart/view.html/ref=lh_cart_vc_btn");
+        checkDelivery("BLA");
+        /*JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("window.open('about:blank','_blank');");
         this.tabs = new ArrayList<>(this.driver.getWindowHandles());
         this.driver.switchTo().window(this.tabs.get(1));
         this.driver.get("https://www.google.com");
         this.driver.close();
         this.driver.switchTo().window(this.tabs.get(0));
-        //closeAll();
+        //closeAll();*/
     }
 
     @Test
     public void testMenu() throws URISyntaxException {
-        print("STOP::: " + ReadConfigFile.getProperty(STOP_UNTIL_PAGE));
-        print("URL::: " + ReadConfigFile.getProperty(PRODUCT_LIST_URL));
+        print("====================================================================================================");
+        print("========================= PARAMETERS =========================");
+        print("STOP PAGE::: " + ReadConfigFile.getProperty(STOP_UNTIL_PAGE));
+        print("START URL::: " + ReadConfigFile.getProperty(PRODUCT_LIST_URL));
+        print("====================================================================================================");
         setAmazonDomain();
         this.driver.get(DOMAIN_URL);
         signin();
@@ -106,7 +119,9 @@ public class ItemTest {
                 //System.out.println("BLA: " + stopPage + "bla2: " + pageCount);
                 if(pageCount <= Integer.parseInt(ReadConfigFile.getProperty(STOP_UNTIL_PAGE))){
                     WebElement currentPage = this.driver.findElement(By.className("pagnCur"));
-                    print("Actual page: " + currentPage.getText());
+                    print("====================================================================================================");
+                    print("========================= ACTUAL PAGE::: " + currentPage.getText() + " =========================");
+                    print("====================================================================================================");
                     List<WebElement> products = getProducts();
                     evaluate_products(products);
                     String link = this.driver.findElement(By.id("pagnNextLink")).getAttribute("href");
@@ -118,7 +133,9 @@ public class ItemTest {
             }
             printResults();
         } else {
-            print("Simple list");
+            print("====================================================================================================");
+            print("=========================================== SIMPLE LIST ============================================");
+            print("====================================================================================================");
             List<WebElement> products = getProducts();
             evaluate_products(products);
             printResults();
@@ -165,20 +182,22 @@ public class ItemTest {
     }
 
     private void signout() {
-        print("=================================== Logout ===================================");
+        print("=================================== LOGOUT ===================================");
         //this.driver.get(DOMAIN_URL+"/gp/flex/sign-out.html/ref=nav_youraccount_signout?ie=UTF8&action=sign-out&path=%2Fgp%2Fyourstore%2Fhome&signIn=1&useRedirectOnSuccess=1");
     }
 
     private void printResults() {
-        print("RESULTS WITH OUT TAX");
-        for (String results_with_out_tax : results_with_out_TAX) {
-            print(results_with_out_tax);
+        print("======================================== RESULTS WITH OUT TAX ========================================");
+        for (StringBuilder results_with_out_tax : results_with_out_TAX) {
+            System.out.println(results_with_out_tax.toString());
 
         }
-        print("RESULTS WITH TAX");
-        for (String results_with_tax : results_with_TAX) {
-            print(results_with_tax);
+        print("====================================================================================================");
+        print("======================================== RESULTS WITH  TAX ========================================");
+        for (StringBuilder results_with_tax : results_with_TAX) {
+            System.out.println(results_with_tax.toString());
         }
+        print("====================================================================================================");
     }
 
     private void evaluate_products(List<WebElement> products) {
@@ -186,7 +205,7 @@ public class ItemTest {
         int i = 1;
         for (WebElement webElement : products) {
             System.out.println("Element: " + i);
-            //if (i >= 10){
+            //if (i >= 5){
             String itemLink = webElement.findElement(By.cssSelector("a[class='a-link-normal s-access-detail-page  s-color-twister-title-link a-text-normal']")).getAttribute("href");
             evaluate_item(itemLink);
             //}
@@ -217,7 +236,7 @@ public class ItemTest {
         this.driver.get(itemLink);
         sleep();
         int size = hasSize();
-        System.out.println("Size::: " + size);
+        //System.out.println("Size::: " + size);
         if (size != -1) {
             if (size != -2) {
                 Select select = new Select(this.driver.findElement(By.id("native_dropdown_selected_size_name")));
@@ -260,14 +279,39 @@ public class ItemTest {
                 //print(temp.getAttribute("outerHTML"));
                 String html = temp.getAttribute("outerHTML");
                 if (html.contains("a-row sc-item-quantity-subtotal")) {
+                    StringBuilder builder = new StringBuilder();
+                    WebElement aux = temp.findElement(By.cssSelector(".a-row.sc-item-quantity-subtotal"));
+                    builder.append("--------------------------------------------------------------------------------");
+                    builder.append(System.lineSeparator());
+                    //print("--------------------------------------------------------------------------------");
+                    builder.append(ANSI_BLUE  + "PRICE: " + aux.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
+                    builder.append(System.lineSeparator());
+                    //print(aux.findElement(By.cssSelector("span")).getText());
                     if (html.contains("a-row sc-importfee")) {
-                        print("Item with TAX: ");
-                        results_with_TAX.add(productLink);
+                        WebElement aux1 = temp.findElement(By.cssSelector(".a-row.sc-importfee"));
+                        builder.append(ANSI_RED  + "IMPORT: " + aux1.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
+                        builder.append(System.lineSeparator());
+                        WebElement aux2 = temp.findElement(By.cssSelector(".a-row.sc-grand-total"));
+                        builder.append(ANSI_YELLOW  + "TOTAL: " + aux2.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
+                        builder.append(System.lineSeparator());
+                        builder.append(ANSI_RED  + "Item with TAX: " + ANSI_RESET);
+                        builder.append(productLink);
+                        builder.append(System.lineSeparator());
+                        builder.append("--------------------------------------------------------------------------------");
+                        results_with_TAX.add(builder);
                     } else {
-                        print("Item with OUT TAX: ");
-                        results_with_out_TAX.add(productLink);
+                        WebElement aux2 = temp.findElement(By.cssSelector(".a-row.sc-grand-total"));
+                        builder.append(ANSI_GREEN  + "TOTAL: " + aux2.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
+                        builder.append(System.lineSeparator());
+                        builder.append(ANSI_RED  + "Item with OUT TAX: " + ANSI_RESET);
+                        builder.append(System.lineSeparator());
+                        builder.append(productLink);
+                        builder.append(System.lineSeparator());
+                        print("--------------------------------------------------------------------------------");
+                        results_with_out_TAX.add(builder);
                     }
-                    print(productLink);
+                    //print(productLink);
+                    System.out.println(builder.toString());
                     return true;
                 }
             }
