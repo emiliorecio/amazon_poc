@@ -187,13 +187,16 @@ public class ItemTest {
     }
 
     private void printResults() {
-        print("======================================== RESULTS WITH OUT TAX ========================================");
+        print(ANSI_GREEN + "======================================================================================================" + ANSI_RESET);
+        print(ANSI_GREEN + "======================================================================================================" + ANSI_RESET);
+        print(ANSI_GREEN + "======================================== RESULTS WITH OUT TAX ========================================" + ANSI_RESET);
         for (StringBuilder results_with_out_tax : results_with_out_TAX) {
             System.out.println(results_with_out_tax.toString());
 
         }
-        print("====================================================================================================");
-        print("======================================== RESULTS WITH  TAX ========================================");
+        print(ANSI_RED + "======================================================================================================" + ANSI_RESET);
+        print(ANSI_RED + "======================================================================================================" + ANSI_RESET);
+        print(ANSI_RED + "==============================++========== RESULTS WITH TAX ++========================================" + ANSI_RESET);
         for (StringBuilder results_with_tax : results_with_TAX) {
             System.out.println(results_with_tax.toString());
         }
@@ -287,6 +290,10 @@ public class ItemTest {
                     builder.append(ANSI_BLUE  + "PRICE: " + aux.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
                     builder.append(System.lineSeparator());
                     //print(aux.findElement(By.cssSelector("span")).getText());
+                    WebElement aux3 = temp.findElement(By.cssSelector(".a-row.sc-shipping-cost"));
+                    WebElement aux4 = aux3.findElement(By.cssSelector(".a-column.a-span3.a-text-right.a-span-last.sc-value"));
+                    builder.append(ANSI_CYAN  + "SHIPPING: " + aux4.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
+                    builder.append(System.lineSeparator());
                     if (html.contains("a-row sc-importfee")) {
                         WebElement aux1 = temp.findElement(By.cssSelector(".a-row.sc-importfee"));
                         builder.append(ANSI_RED  + "IMPORT: " + aux1.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
@@ -300,10 +307,13 @@ public class ItemTest {
                         builder.append("--------------------------------------------------------------------------------");
                         results_with_TAX.add(builder);
                     } else {
+                        //WebElement aux3 = temp.findElement(By.cssSelector(".a-row.sc-shipping-cost"));
+                        //builder.append(ANSI_CYAN  + "SHIPPING: " + aux3.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
+                        //builder.append(System.lineSeparator());
                         WebElement aux2 = temp.findElement(By.cssSelector(".a-row.sc-grand-total"));
                         builder.append(ANSI_GREEN  + "TOTAL: " + aux2.findElement(By.cssSelector("span")).getText() + ANSI_RESET);
                         builder.append(System.lineSeparator());
-                        builder.append(ANSI_RED  + "Item with OUT TAX: " + ANSI_RESET);
+                        builder.append(ANSI_GREEN  + "Item with OUT TAX: " + ANSI_RESET);
                         builder.append(System.lineSeparator());
                         builder.append(productLink);
                         builder.append(System.lineSeparator());
